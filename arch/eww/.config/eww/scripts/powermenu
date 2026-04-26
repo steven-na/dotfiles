@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+chosen=$(printf "Suspend\nReboot\nShutdown" | bemenu -p " Power")
+case "$chosen" in
+    Suspend)  systemctl suspend ;;
+    Reboot)   systemctl reboot ;;
+    Shutdown) systemctl poweroff ;;
+esac

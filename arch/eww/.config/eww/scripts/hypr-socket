@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+"""Stream lines from Hyprland's socket2 IPC."""
+import socket, sys, os
+
+sock_path = (
+    os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")
+    + "/hypr/"
+    + os.environ["HYPRLAND_INSTANCE_SIGNATURE"]
+    + "/.socket2.sock"
+)
+
+s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+s.connect(sock_path)
+
+buf = b""
+while True:
+    chunk = s.recv(4096)
+    if not chunk:
+        break
+    buf += chunk
+    while b"\n" in buf:
+        line, buf = buf.split(b"\n", 1)
+        sys.stdout.write(line.decode(errors="replace") + "\n")
+        sys.stdout.flush()

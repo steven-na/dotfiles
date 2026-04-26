@@ -1,0 +1,150 @@
+;; ── Listeners (Hyprland IPC) ──────────────────────────────────────────────
+;; hyprland-workspaces emits JSON arrays with {id, name, windows, isActive}
+;; on every workspace change — single source of truth for list + active state.
+
+(deflisten workspaces :initial "[]"
+  `scripts/workspaces`)
+
+;; ── Polls ──────────────────────────────────────────────────────────────────
+
+(defpoll clock :interval "1s"
+  `date +"%-H:%M"`)
+
+(defpoll date-str :interval "60s"
+  `date +"%a %b %d"`)
+
+;; Show the PLAYING source; fall back to any paused one
+(defpoll player-status :interval "2s"
+  `playerctl -a status 2>/dev/null | grep -q "^Playing" && echo "Playing" || playerctl status 2>/dev/null || echo "Stopped"`)
+
+(defpoll player-song :interval "2s"
+  `playerctl -a metadata --format "{{status}}||{{ artist }} - {{ title }}" 2>/dev/null | grep "^Playing||" | head -1 | sed 's/^Playing||//' || playerctl metadata --format "{{ artist }} - {{ title }}" 2>/dev/null || echo ""`)
+
+(defpoll battery-level :interval "30s" :initial "100"
+  `cat /sys/class/power_supply/BAT0/capacity 2>/dev/null || echo "100"`)
+
+(defpoll battery-status :interval "10s" :initial "Unknown"
+  `cat /sys/class/power_supply/BAT0/status 2>/dev/null || echo "Unknown"`)
+
+(defpoll cpu :interval "3s"
+  `scripts/cpu`)
+
+(defpoll ram :interval "5s"
+  `free | awk '/^Mem/{printf "%d", $3/$2*100}'`)
+
+(defpoll disk :interval "60s"
+  `df / | awk 'NR==2{printf "%d", $3/$2*100}'`)
+
+(defpoll volume :interval "1s"
+  `pamixer --get-volume 2>/dev/null || echo "0"`)
+
+;; Use sysfs operstate — works regardless of network manager backend
+(defpoll wifi-iface :interval "5s"
+  `IFACE=$(ls /sys/class/net | grep -m1 '^wl'); [ -n "$IFACE" ] && [ "$(cat /sys/class/net/$IFACE/operstate 2>/dev/null)" = "up" ] && echo "$IFACE" || echo "disconnected"`)
+
+(defpoll brightness :interval "2s"
+  `brightnessctl -m 2>/dev/null | awk -F, '{print int($4)}' || echo "100"`)
+
+(defpoll netspeed :interval "3s"
+  `scripts/netspeed`)
+
+;; ── Left: Workspaces + Music ───────────────────────────────────────────────
+
+(defwidget workspaces []
+  (box :class "workspaces" :space-evenly false :spacing 5
+    (for ws in workspaces
+      (button
+        :class {ws.active ? "ws active" : "ws"}
+        :onclick "hyprctl dispatch workspace ${ws.id}"
+        {ws.id}))))
+
+(defwidget music []
+  (eventbox
+    :onclick "playerctl play-pause"
+    (box :class "music"
+         :space-evenly false :spacing 5
+         :visible {player-status != "Stopped" && player-status != ""}
+      (label :class "music-icon"
+             :text {player-status == "Playing" ? "▶" : "⏸"})
+      (label :class "song" :text player-song :limit-width 30))))
+
+;; ── Center: Clock ──────────────────────────────────────────────────────────
+
+(defwidget center-section []
+  (box :class "center" :halign "center" :space-evenly false :spacing 8
+    (label :class "date"  :text date-str)
+    (label :class "clock" :text clock)))
+
+;; ── Right: Stats ───────────────────────────────────────────────────────────
+
+(defwidget bright-stat []
+  (eventbox
+    :onscroll "[ '{}' = 'up' ] && brightnessctl set +5% || brightnessctl set 5%-"
+    (box :class "stat" :space-evenly false :spacing 3
+      (label :class "stat-label" :text "bright")
+      (label :class "stat-val"   :text "${brightness}%"))))
+
+(defwidget audio-stat []
+  (eventbox
+    :onscroll "[ '{}' = 'up' ] && pamixer --increase 5 || pamixer --decrease 5"
+    (box :class "stat" :space-evenly false :spacing 3
+      (label :class "stat-label" :text "audio")
+      (label :class "stat-val"   :text "${volume}%"))))
+
+(defwidget wifi-stat []
+  (eventbox
+    :onclick "ghostty -e nmtui &"
+    (box :class "stat" :space-evenly false :spacing 3
+      (label :class "stat-label" :text "wifi")
+      (label :class "stat-val"   :text wifi-iface))))
+
+(defwidget cpu-stat []
+  (eventbox
+    :onclick "ghostty -e btop &"
+    (box :class "stat" :space-evenly false :spacing 3
+      (label :class "stat-label" :text "cpu")
+      (label :class "stat-val"   :text "${cpu}%"))))
+
+(defwidget right-section []
+  (box :class "right" :halign "end" :space-evenly false :spacing 8
+    (bright-stat)
+    (audio-stat)
+    (label :class "stat-val net" :text netspeed)
+    (wifi-stat)
+    (stat :lbl "bat"  :value "${battery-level}%"
+          :class {battery-level < 20 ? "warn" : ""})
+    (stat :lbl "strg" :value "${disk}%")
+    (stat :lbl "ram"  :value "${ram}%")
+    (cpu-stat)
+    (button :class "power-btn" :onclick "scripts/powermenu &" "pwr")))
+
+;; Plain stat (non-interactive) ─────────────────────────────────────────────
+
+(defwidget stat [lbl value ?class]
+  (box :class "stat" :space-evenly false :spacing 3
+    (label :class "stat-label" :text lbl)
+    (label :class {class == "" ? "stat-val" : "stat-val ${class}"} :text value)))
+
+;; ── Bar ────────────────────────────────────────────────────────────────────
+
+(defwidget bar []
+  (centerbox :class "bar" :orientation "h"
+    (box :class "left" :halign "start" :space-evenly false :spacing 12
+      (workspaces)
+      (music))
+    (center-section)
+    (right-section)))
+
+(defwindow bar
+  :monitor 0
+  :windowtype "dock"
+  :geometry (geometry
+    :x "0%"
+    :y "0%"
+    :width "100%"
+    :height "24px"
+    :anchor "top center")
+  :stacking "fg"
+  :exclusive true
+  :focusable false
+  (bar))

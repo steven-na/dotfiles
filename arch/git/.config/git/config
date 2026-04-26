@@ -1,0 +1,21 @@
+[user]
+    name  = "steven-na"
+    email = "noreply.github@stvnc.dev"
+
+[core]
+    editor = nvim
+
+[init]
+    defaultBranch = main
+
+[pull]
+    rebase = true
+
+[push]
+    autoSetupRemote = true
+
+[merge]
+    conflictstyle = diff3
+
+[diff]
+    colorMoved = default

@@ -1,0 +1,21 @@
+font-family = JetBrainsMono Nerd Font
+font-size = 12
+
+scrollback-limit = 10000
+
+shell-integration = fish
+command = /usr/bin/fish
+
+window-padding-x = 8
+window-padding-y = 8
+
+mouse-hide-while-typing = true
+
+# Ctrl+Backspace sends C-h by default; remap to C-w (backward-kill-word)
+keybind = ctrl+backspace=text:\x17
+confirm-close-surface = false
+
+background-opacity = 0.85
+background-blur-radius = 20
+
+config-file = /home/blake/.cache/wallust/ghostty-colors.conf

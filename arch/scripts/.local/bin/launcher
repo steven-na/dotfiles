@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Application launcher using bemenu — colors sourced from wallust cache
+
+FONT="JetBrainsMono Nerd Font 12"
+
+# Defaults (used until wallust has run at least once)
+NB="#1e1e2e" NF="#cdd6f4" SB="#89b4fa" SF="#1e1e2e"
+AB="#313244" AF="#cdd6f4" TB="#1e1e2e" TF="#89b4fa"
+FB="#1e1e2e" FF="#cdd6f4"
+
+[ -f ~/.cache/wallust/launcher-colors.sh ] && source ~/.cache/wallust/launcher-colors.sh
+
+bemenu-run \
+  --fn     "$FONT" \
+  --nb     "$NB"   \
+  --nf     "$NF"   \
+  --sb     "$SB"   \
+  --sf     "$SF"   \
+  --ab     "$AB"   \
+  --af     "$AF"   \
+  --tb     "$TB"   \
+  --tf     "$TF"   \
+  --fb     "$FB"   \
+  --ff     "$FF"   \
+  --list   10      \
+  --prompt " "

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+WALLPAPER="${1:?usage: set-wallpaper <path>}"
+
+awww img "$WALLPAPER" \
+  --transition-type wipe \
+  --transition-angle 30 \
+  --transition-duration 1
+
+wallust run "$WALLPAPER" --ignore-sequence background --ignore-sequence foreground
+
+gdbus call --session \
+  --dest com.mitchellh.ghostty \
+  --object-path /com/mitchellh/ghostty \
+  --method org.gtk.Actions.Activate \
+  "reload-config" "[]" "{}" > /dev/null 2>&1 || true
+
+hyprctl reload
+pkill -x mako || true
+mako &
+eww reload || true
+
+# spicetify watch -s picks up color.ini changes automatically.
+# Fallback: refresh manually if watch isn't running.
+pgrep -f "spicetify watch" > /dev/null || spicetify refresh > /dev/null 2>&1 || true
+
+# nvim picks up the new palette automatically via a libuv file watcher in colorscheme.lua

@@ -1,0 +1,14 @@
+backend = "full"
+color_space = "lchmixed"
+palette = "dark16"
+threshold = 11
+check_contrast = true
+
+[templates]
+hyprland = { template = "hyprland-colors.conf", target = "~/.cache/wallust/hyprland-colors.conf" }
+mako     = { template = "mako.conf",            target = "~/.config/mako/config" }
+eww      = { template = "eww-colors.scss",      target = "~/.cache/wallust/eww-colors.scss" }
+ghostty  = { template = "ghostty-colors.conf",  target = "~/.cache/wallust/ghostty-colors.conf" }
+launcher   = { template = "launcher-colors.sh",   target = "~/.cache/wallust/launcher-colors.sh" }
+spicetify  = { template = "spicetify-colors.ini", target = "~/.config/spicetify/Themes/wallust/color.ini" }
+nvim       = { template = "nvim.lua",             target = "~/.cache/wallust/nvim.lua" }

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+WALLPAPER_DIR="${HOME}/wallpapers"
+
+selected=$(find "$WALLPAPER_DIR" -type f \( \
+    -name "*.jpg" -o -name "*.jpeg" -o \
+    -name "*.png" -o -name "*.webp"  \) | sort | \
+  fzf --preview 'chafa --size=80x40 {}' \
+      --preview-window 'right:60%' \
+      --prompt "wallpaper> ")
+
+[ -n "$selected" ] && ~/.local/bin/set-wallpaper "$selected"

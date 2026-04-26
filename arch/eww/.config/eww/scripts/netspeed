@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+IFACE=$(ip route show default 2>/dev/null | awk '{print $5; exit}')
+if [[ -z "$IFACE" ]]; then echo "↓0 ↑0 KB/s"; exit; fi
+rx1=$(cat /sys/class/net/"$IFACE"/statistics/rx_bytes 2>/dev/null || echo 0)
+tx1=$(cat /sys/class/net/"$IFACE"/statistics/tx_bytes 2>/dev/null || echo 0)
+sleep 1
+rx2=$(cat /sys/class/net/"$IFACE"/statistics/rx_bytes 2>/dev/null || echo 0)
+tx2=$(cat /sys/class/net/"$IFACE"/statistics/tx_bytes 2>/dev/null || echo 0)
+echo "↓$(( (rx2-rx1)/1024 )) ↑$(( (tx2-tx1)/1024 )) KB/s"

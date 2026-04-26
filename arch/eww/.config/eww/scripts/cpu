@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+read -r _ u1 _ s1 id1 _ < /proc/stat
+sleep 1
+read -r _ u2 _ s2 id2 _ < /proc/stat
+used=$(( (u2+s2) - (u1+s1) ))
+total=$(( (u2+s2+id2) - (u1+s1+id1) ))
+printf "%d\n" $(( total > 0 ? 100 * used / total : 0 ))

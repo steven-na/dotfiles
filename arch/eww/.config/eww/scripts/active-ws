@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+hyprctl activeworkspace | awk '/^workspace/{print $3}'
