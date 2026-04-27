@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+subreddit="EarthPorn"
+wallpaper_dir="$HOME/wallpapers"
+min_width=1920
+mkdir -p "$wallpaper_dir"
+
+json=$(curl -sf -A "Mozilla/5.0 (X11; Linux x86_64) get-new-wallpaper/1.0" \
+    "https://www.reddit.com/r/${subreddit}.json?limit=25")
+
+# Keep posts where:
+#   - preview source exists and is at least min_width wide
+#   - aspect ratio is wider than 4:3
+# For Reddit-hosted images use i.redd.it directly; for external images fall back
+# to the signed preview.redd.it URL so hotlink protection doesn't bite us.
+mapfile -t candidates < <(echo "$json" | jq -r \
+  --argjson min "$min_width" '
+  .data.children[].data |
+  select(.preview.images[0].source != null) |
+  select(.preview.images[0].source.width >= $min) |
+  select((.preview.images[0].source.width / .preview.images[0].source.height) > (4/3)) |
+  [
+    .title,
+    (if (.url | test("^https://i\\.redd\\.it/")) then .url
+     else (.preview.images[0].source.url | gsub("&amp;"; "&"))
+     end)
+  ] | @tsv
+')
+
+if [[ ${#candidates[@]} -eq 0 ]]; then
+    echo "No suitable images found." >&2
+    exit 1
+fi
+
+selected="${candidates[$((RANDOM % ${#candidates[@]}))]}"
+title=$(printf '%s' "$selected" | cut -f1)
+img_url=$(printf '%s' "$selected" | cut -f2)
+
+safe_name=$(printf '%s' "$title" \
+    | tr '[:upper:]' '[:lower:]' \
+    | sed 's/[^a-z0-9 ]//g' \
+    | tr -s ' ' '-' \
+    | sed 's/^-//; s/-$//' \
+    | cut -c1-60)
+
+ext=$(printf '%s' "$img_url" | grep -oP '\.(jpg|jpeg|png|webp)' | tail -1 | tr -d '.')
+[[ -z "$ext" ]] && ext="jpg"
+
+filename="${wallpaper_dir}/${safe_name}.${ext}"
+
+echo "Downloading: $title"
+curl -sfL \
+    -A "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0" \
+    --referer "https://www.reddit.com/" \
+    -o "$filename" "$img_url" || { echo "Download failed." >&2; rm -f "$filename"; exit 1; }
+
+echo "Saved: $filename"
+set-wallpaper "$filename"

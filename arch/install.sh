@@ -38,6 +38,7 @@ pacman_packages+=(
   pamixer
   playerctl
   pavucontrol
+  easyeffects
 )
 
 # ── Display / input ───────────────────────────────────────────────────────────
@@ -48,6 +49,7 @@ pacman_packages+=(
   brightnessctl
   ydotool
   chafa
+  obs-studio
 )
 
 # ── Notifications ─────────────────────────────────────────────────────────────
