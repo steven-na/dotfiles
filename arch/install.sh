@@ -22,6 +22,7 @@ ask() {
 pacman_packages=(
   hyprland
   hyprlock
+  hyprsunset
   hypridle
   xdg-desktop-portal-hyprland
   xdg-desktop-portal-gtk
@@ -151,6 +152,15 @@ if ask "==> Install Spotify + Spicetify (wallust auto-theming)?"; then
     spicetify backup apply
 
     echo "  Spotify + Spicetify installed and themed."
+fi
+
+# ── Optional: Zen-browser ─────────────────────────────────────────
+echo ""
+if ask "==> Install Zen browser and extensions?"; then
+    yay -S --needed \
+        zen-browser-bin \
+
+    echo "  Zen browser installed."
 fi
 
 # ── Optional: Neovim dev environment ─────────────────────────────────────────

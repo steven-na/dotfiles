@@ -42,8 +42,8 @@
 (defpoll wifi-iface :interval "5s"
   `IFACE=$(ls /sys/class/net | grep -m1 '^wl'); [ -n "$IFACE" ] && [ "$(cat /sys/class/net/$IFACE/operstate 2>/dev/null)" = "up" ] && echo "$IFACE" || echo "disconnected"`)
 
-(defpoll brightness :interval "2s"
-  `brightnessctl -m 2>/dev/null | awk -F, '{print int($4)}' || echo "100"`)
+(defpoll brightness :interval "1s"
+  `hyprctl hyprsunset gamma 2>/dev/null  || echo "100"`)
 
 (defpoll netspeed :interval "3s"
   `scripts/netspeed`)
@@ -79,7 +79,8 @@
 
 (defwidget bright-stat []
   (eventbox
-    :onscroll "[ '{}' = 'up' ] && brightnessctl set +5% || brightnessctl set 5%-"
+    :onscroll "[ '{}' = 'up' ] && hyprctl hyprsunset gamma +5 || hyprctl hyprsunset gamma -5"
+    :onclick "toggle-screen-temp"
     (box :class "stat" :space-evenly false :spacing 3
       (label :class "stat-label" :text "bright")
       (label :class "stat-val"   :text "${brightness}%"))))

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+sentinelfile="${XDG_RUNTIME_DIR}/screentempislow"
+
+if [[ -e ${sentinelfile} ]]; then
+    hyprctl hyprsunset temperature 6000
+    rm ${sentinelfile}
+else
+    hyprctl hyprsunset temperature 3500
+    touch ${sentinelfile}
+fi
