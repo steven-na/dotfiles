@@ -1,8 +1,8 @@
 return {
     "stevearc/conform.nvim",
     event = "BufWritePre",
-    cmd   = { "ConformInfo", "FormatToggle" },
-    keys  = {
+    cmd = { "ConformInfo", "FormatToggle" },
+    keys = {
         {
             "<leader>cF",
             function()
@@ -17,7 +17,9 @@ return {
         },
         {
             "<leader>cf",
-            function() require("conform").format({ async = true, lsp_fallback = true }) end,
+            function()
+                require("conform").format({ async = true, lsp_fallback = true })
+            end,
             desc = "Format buffer",
         },
     },
@@ -26,18 +28,27 @@ return {
 
         require("conform").setup({
             formatters_by_ft = {
-                c      = { "clang_format" },
-                cpp    = { "clang_format" },
+                c = { "clang_format" },
+                cpp = { "clang_format" },
                 python = { "isort", "black" },
-                lua    = { "stylua" },
+                lua = { "stylua" },
                 haskell = { "ormolu" },
             },
+
             format_on_save = function(bufnr)
-                if not vim.g.format_on_save then return end
-                if vim.g.disable_autoformat_buf and vim.g.disable_autoformat_buf[bufnr] then return end
+                if not vim.g.format_on_save then
+                    return
+                end
+                if vim.g.disable_autoformat_buf and vim.g.disable_autoformat_buf[bufnr] then
+                    return
+                end
                 return { timeout_ms = 500, lsp_fallback = true }
             end,
         })
+
+        require("conform").formatters.clang_format = {
+            prepend_args = { "--style={IndentWidth: 4, TabWidth: 4, UseTab: Never}" },
+        }
 
         vim.api.nvim_create_user_command("FormatToggle", function()
             vim.g.format_on_save = not vim.g.format_on_save
