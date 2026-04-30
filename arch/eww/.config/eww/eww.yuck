@@ -1,17 +1,10 @@
-;; ── Listeners (Hyprland IPC) ──────────────────────────────────────────────
-;; hyprland-workspaces emits JSON arrays with {id, name, windows, isActive}
-;; on every workspace change — single source of truth for list + active state.
-
-(deflisten workspaces :initial "[]"
-  `scripts/workspaces`)
-
 ;; ── Polls ──────────────────────────────────────────────────────────────────
 
 (defpoll clock :interval "1s"
   `date +"%-H:%M"`)
 
 (defpoll date-str :interval "60s"
-  `date +"%a %b %d"`)
+  `scripts/day-with-suffix`)
 
 ;; Show the PLAYING source; fall back to any paused one
 (defpoll player-status :interval "2s"
@@ -48,15 +41,7 @@
 (defpoll netspeed :interval "3s"
   `scripts/netspeed`)
 
-;; ── Left: Workspaces + Music ───────────────────────────────────────────────
-
-(defwidget workspaces []
-  (box :class "workspaces" :space-evenly false :spacing 5
-    (for ws in workspaces
-      (button
-        :class {ws.active ? "ws active" : "ws"}
-        :onclick "hyprctl dispatch workspace ${ws.id}"
-        {ws.id}))))
+;; ── Left: Date + Music ───────────────────────────────────────────────
 
 (defwidget music []
   (eventbox
@@ -68,12 +53,11 @@
              :text {player-status == "Playing" ? "▶" : "⏸"})
       (label :class "song" :text player-song :limit-width 30))))
 
-;; ── Center: Clock ──────────────────────────────────────────────────────────
-
-(defwidget center-section []
-  (box :class "center" :halign "center" :space-evenly false :spacing 8
+(defwidget left-section []
+  (box :class "left" :space-evenly false :spacing 8
+    (label :class "clock" :text clock)
     (label :class "date"  :text date-str)
-    (label :class "clock" :text clock)))
+    (music)))
 
 ;; ── Right: Stats ───────────────────────────────────────────────────────────
 
@@ -130,10 +114,8 @@
 
 (defwidget bar []
   (centerbox :class "bar" :orientation "h"
-    (box :class "left" :halign "start" :space-evenly false :spacing 12
-      (workspaces)
-      (music))
-    (center-section)
+    (left-section)
+    (box)
     (right-section)))
 
 (defwindow bar

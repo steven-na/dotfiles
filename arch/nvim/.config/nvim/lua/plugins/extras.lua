@@ -34,4 +34,19 @@ return {
             view_options = { show_hidden = true },
         },
     },
+    {
+        "nullromo/go-up.nvim",
+        opts = {
+            respectScrolloff = true,
+        }, -- specify options here
+        config = function(_, opts)
+            local goUp = require("go-up")
+            goUp.setup(opts)
+
+            -- Use <C-a> to center
+            vim.keymap.set({ "n", "v" }, "<C-a>", function()
+                require("go-up").centerScreen()
+            end, { desc = "center the screen" })
+        end,
+    },
 }
