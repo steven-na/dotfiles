@@ -33,6 +33,7 @@ return {
                 python = { "isort", "black" },
                 lua = { "stylua" },
                 haskell = { "ormolu" },
+                odin = { "odinfmt" },
             },
 
             format_on_save = function(bufnr)

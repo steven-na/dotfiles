@@ -8,6 +8,10 @@ set fish_greeting
 set -gx EDITOR nvim
 set -gx BROWSER zen-browser
 
+# ODIN setup
+set -gx ODIN_ROOT ~/code/odin/Odin/
+set -gx OLS_BUILTIN_FOLDER ~/code/odin/ols/builtin/
+
 fish_add_path ~/.local/bin
 
 # Starship prompt

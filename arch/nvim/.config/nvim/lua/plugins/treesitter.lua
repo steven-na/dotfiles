@@ -18,6 +18,7 @@ return {
             "json",
             "toml",
             "yaml",
+            "odin",
         },
         highlight = { enable = true },
         indent = { enable = true },
