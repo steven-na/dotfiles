@@ -12,7 +12,7 @@ opt.softtabstop = 4
 
 -- Visual
 opt.cursorline = true
-opt.scrolloff = 10
+opt.scrolloff = 20
 opt.signcolumn = "yes"
 opt.list = true
 opt.listchars = { tab = "  ", trail = "·", nbsp = "␣" }

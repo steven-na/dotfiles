@@ -8,6 +8,7 @@ return {
                 local ok, p = pcall(dofile, vim.fn.expand("~/.cache/wallust/nvim.lua"))
                 if not ok then
                     p = {
+                        base01 = "#181825",
                         base0D = "#89b4fa",
                         base05 = "#cdd6f4",
                         base04 = "#585b70",
@@ -17,20 +18,21 @@ return {
                         base0A = "#f9e2af",
                     }
                 end
+                local bg = vim.g.transparent_bg and "NONE" or p.base01
                 return {
                     normal = {
-                        a = { fg = p.base0D, bg = "NONE", gui = "bold" },
-                        b = { fg = p.base05, bg = "NONE" },
-                        c = { fg = p.base04, bg = "NONE" },
+                        a = { fg = p.base0D, bg = bg, gui = "bold" },
+                        b = { fg = p.base05, bg = bg },
+                        c = { fg = p.base04, bg = bg },
                     },
-                    insert = { a = { fg = p.base0B, bg = "NONE", gui = "bold" } },
-                    visual = { a = { fg = p.base0E, bg = "NONE", gui = "bold" } },
-                    replace = { a = { fg = p.base08, bg = "NONE", gui = "bold" } },
-                    command = { a = { fg = p.base0A, bg = "NONE", gui = "bold" } },
+                    insert = { a = { fg = p.base0B, bg = bg, gui = "bold" } },
+                    visual = { a = { fg = p.base0E, bg = bg, gui = "bold" } },
+                    replace = { a = { fg = p.base08, bg = bg, gui = "bold" } },
+                    command = { a = { fg = p.base0A, bg = bg, gui = "bold" } },
                     inactive = {
-                        a = { fg = p.base04, bg = "NONE" },
-                        b = { fg = p.base04, bg = "NONE" },
-                        c = { fg = p.base04, bg = "NONE" },
+                        a = { fg = p.base04, bg = bg },
+                        b = { fg = p.base04, bg = bg },
+                        c = { fg = p.base04, bg = bg },
                     },
                 }
             end
@@ -52,25 +54,16 @@ return {
                 },
             })
 
-            vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI", "BufEnter" }, {
-                group = vim.api.nvim_create_augroup("ScrollOffEOF", {}),
+            vim.api.nvim_create_autocmd("User", {
+                pattern = "TransparentToggle",
                 callback = function()
-                    local win_h = vim.api.nvim_win_get_height(0)
-                    local off = math.min(vim.o.scrolloff, math.floor(win_h / 2))
-                    local dist = vim.fn.line("$") - vim.fn.line(".")
-                    local rem = vim.fn.line("w$") - vim.fn.line("w0") + 1
-                    if dist < off and win_h - rem + dist < off then
-                        local view = vim.fn.winsaveview()
-                        view.topline = view.topline + off - (win_h - rem + dist)
-                        vim.fn.winrestview(view)
-                    end
+                    require("lualine").setup({ options = { theme = make_theme() } })
                 end,
             })
 
             vim.api.nvim_create_autocmd("ColorScheme", {
                 callback = function()
                     require("lualine").setup({ options = { theme = make_theme() } })
-                    vim.o.laststatus = 0
                 end,
             })
         end,
