@@ -88,6 +88,7 @@ return {
                 {},
                 vim.schedule_wrap(function()
                     apply(load_palette())
+                    vim.api.nvim_exec_autocmds("User", { pattern = "ThemeChanged" })
                 end)
             )
         end

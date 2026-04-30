@@ -55,7 +55,7 @@ return {
             })
 
             vim.api.nvim_create_autocmd("User", {
-                pattern = "TransparentToggle",
+                pattern = "ThemeChanged",
                 callback = function()
                     require("lualine").setup({ options = { theme = make_theme() } })
                 end,

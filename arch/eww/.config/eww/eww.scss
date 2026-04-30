@@ -16,7 +16,7 @@ $warn:    #f38ba8;
 }
 
 .bar {
-  background-color: transparentize($bg, 0.4);
+  background-color: transparentize($bg, 0.5);
   color:            $fg;
   border:           none;
   box-shadow:       none;
