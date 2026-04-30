@@ -61,16 +61,15 @@ return {
             })
 
             vim.diagnostic.config({
-                virtual_text = false,
+                virtual_text = true,
                 signs = {
                     text = {
-                        [vim.diagnostic.severity.ERROR] = " ",
-                        [vim.diagnostic.severity.WARN] = " ",
-                        [vim.diagnostic.severity.INFO] = " ",
-                        [vim.diagnostic.severity.HINT] = " ",
+                        [vim.diagnostic.severity.ERROR] = "",
+                        [vim.diagnostic.severity.WARN] = "",
+                        [vim.diagnostic.severity.INFO] = "",
+                        [vim.diagnostic.severity.HINT] = "",
                     },
                 },
-                float = { border = "single" },
                 underline = true,
                 update_in_insert = false,
             })

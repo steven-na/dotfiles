@@ -50,7 +50,7 @@
          :space-evenly false :spacing 5
          :visible {player-status != "Stopped" && player-status != ""}
       (label :class "music-icon"
-             :text {player-status == "Playing" ? "▶" : "⏸"})
+             :text {player-status != "Playing" ? "▶" : "⏸"})
       (label :class "song" :text player-song :limit-width 30))))
 
 (defwidget left-section []
