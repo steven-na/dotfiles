@@ -1,7 +1,6 @@
 return {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
-    tag = "v0.9.3",
     event = { "BufReadPre", "BufNewFile" },
     opts = {
         ensure_installed = {
@@ -26,6 +25,7 @@ return {
         auto_install = false,
     },
     config = function(_, opts)
-        require("nvim-treesitter.configs").setup(opts)
+        -- new API, configs module is gone
+        require("nvim-treesitter").setup(opts)
     end,
 }

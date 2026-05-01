@@ -15,10 +15,15 @@ high=$(echo  "$data" | jq -r '.weather[0].maxtempF')
 low=$(echo   "$data" | jq -r '.weather[0].mintempF')
 
 # ── Night / moon ───────────────────────────────────────────────────────────
-sunset_raw=$(echo "$data" | jq -r '.weather[0].astronomy[0].sunset')
-sunset_epoch=$(date -d "today $sunset_raw" +%s 2>/dev/null)
+sunrise_raw=$(echo "$data" | jq -r '.weather[0].astronomy[0].sunrise')
+sunset_raw=$(echo  "$data" | jq -r '.weather[0].astronomy[0].sunset')
+
+sunrise_epoch=$(date -d "today $sunrise_raw" +%s)
+sunset_epoch=$(date -d  "today $sunset_raw"  +%s)
+now_epoch=$(date +%s)
+
 is_night=false
-[[ $(date +%s) -ge $sunset_epoch ]] && is_night=true
+[[ $now_epoch -ge $sunset_epoch || $now_epoch -lt $sunrise_epoch ]] && is_night=true
 
 moon_phase() {
   local ref; ref=$(date -d "2000-01-06" +%s)

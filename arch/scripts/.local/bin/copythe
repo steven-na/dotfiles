@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+declare -A sources
+sources[date]="date"
+sources[ip]="ip"
+
+tocopy=""
+
+case "$1" in
+    ${sources[date]} )
+        tocopy=$(date --rfc-3339 date)
+        ;;
+    ${sources[ip]} )
+        tocopy=$(curl --silent ifconfig.me)
+        ;;
+    *)
+        args=""
+        for val in "${sources[@]}"; do
+            args+="|${val}"
+        done
+
+        echo "usage: $0 (${args#|})"
+        exit
+        ;;
+
+esac
+
+echo "Copying: ${tocopy:0:50}"
+wl-copy ${tocopy}
