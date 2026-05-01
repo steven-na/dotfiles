@@ -14,6 +14,26 @@ desc=$(echo  "$data" | jq -r '.current_condition[0].weatherDesc[0].value')
 high=$(echo  "$data" | jq -r '.weather[0].maxtempF')
 low=$(echo   "$data" | jq -r '.weather[0].mintempF')
 
+# ── Night / moon ───────────────────────────────────────────────────────────
+sunset_raw=$(echo "$data" | jq -r '.weather[0].astronomy[0].sunset')
+sunset_epoch=$(date -d "today $sunset_raw" +%s 2>/dev/null)
+is_night=false
+[[ $(date +%s) -ge $sunset_epoch ]] && is_night=true
+
+moon_phase() {
+  local ref; ref=$(date -d "2000-01-06" +%s)
+  local phase=$(( ( ($(date +%s) - ref) / 86400 ) % 29 ))
+  if   [[ $phase -le 1  ]]; then echo "New Moon"
+  elif [[ $phase -le 7  ]]; then echo "Waxing Crescent"
+  elif [[ $phase -le 8  ]]; then echo "First Quarter"
+  elif [[ $phase -le 14 ]]; then echo "Waxing Gibbous"
+  elif [[ $phase -le 15 ]]; then echo "Full Moon"
+  elif [[ $phase -le 21 ]]; then echo "Waning Gibbous"
+  elif [[ $phase -le 22 ]]; then echo "Last Quarter"
+  else                            echo "Waning Crescent"
+  fi
+}
+
 sign() { [ "$1" -ge 0 ] && echo "+" || echo ""; }
 
 line1="$(sign $temp)${temp}°F, ${desc}"
@@ -22,3 +42,7 @@ line2="Feels $(sign $feels)${feels}° · ↑$(sign $high)${high} ↓$(sign $low)
 notify-send --urgency=low --expire-time=5000 \
   --icon=weather-clear \
   "Weather" "${line1}\n${line2}"
+
+$is_night && notify-send --urgency=low --expire-time=5000 \
+  --icon=weather-clear \
+  "Moon" "$(moon_phase)"

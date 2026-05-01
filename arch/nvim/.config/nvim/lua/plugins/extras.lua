@@ -32,6 +32,7 @@ return {
         opts = {
             default_file_explorer = true,
             view_options = { show_hidden = true },
+            constrain_cursor = false,
         },
     },
     {
@@ -42,6 +43,7 @@ return {
             ignoredFiletypes = {
                 "oil",
                 "snacks_dashboard",
+                "lazy",
             },
         }, -- specify options here
         config = function(_, opts)
@@ -61,6 +63,10 @@ return {
             vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI", "BufEnter" }, {
                 group = vim.api.nvim_create_augroup("ScrollOffEOF", { clear = true }),
                 callback = function()
+                    if vim.bo.filetype == "oil" then
+                        return
+                    end
+
                     local win_h = vim.api.nvim_win_get_height(0)
                     local off = math.min(SCROLLOFF, math.floor(win_h / 2))
                     local line = vim.fn.line(".")

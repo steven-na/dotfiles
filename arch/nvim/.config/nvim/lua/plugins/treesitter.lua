@@ -1,6 +1,7 @@
 return {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
+    tag = "v0.9.3",
     event = { "BufReadPre", "BufNewFile" },
     opts = {
         ensure_installed = {
@@ -25,11 +26,6 @@ return {
         auto_install = false,
     },
     config = function(_, opts)
-        local ok = pcall(require, "nvim-treesitter.configs")
-        if ok then
-            require("nvim-treesitter.configs").setup(opts)
-        else
-            require("nvim-treesitter").setup(opts)
-        end
+        require("nvim-treesitter.configs").setup(opts)
     end,
 }

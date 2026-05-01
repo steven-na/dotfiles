@@ -87,6 +87,7 @@ pacman_packages+=(
 # ── Fonts ─────────────────────────────────────────────────────────────────────
 pacman_packages+=(
   ttf-jetbrains-mono-nerd
+  ttf-cascadia-code-nerd
   noto-fonts
   noto-fonts-emoji
   noto-fonts-cjk
