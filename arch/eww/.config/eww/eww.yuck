@@ -13,12 +13,6 @@
 (defpoll player-song :interval "2s"
   `playerctl -a metadata --format "{{status}}||{{ artist }} - {{ title }}" 2>/dev/null | grep "^Playing||" | head -1 | sed 's/^Playing||//' || playerctl metadata --format "{{ artist }} - {{ title }}" 2>/dev/null || echo ""`)
 
-(defpoll battery-level :interval "30s" :initial "100"
-  `cat /sys/class/power_supply/BAT0/capacity 2>/dev/null || echo "100"`)
-
-(defpoll battery-status :interval "10s" :initial "Unknown"
-  `cat /sys/class/power_supply/BAT0/status 2>/dev/null || echo "Unknown"`)
-
 (defpoll cpu :interval "3s"
   `scripts/cpu`)
 
@@ -41,6 +35,18 @@
 (defpoll netspeed :interval "3s"
   `scripts/netspeed`)
 
+(defpoll battery-level :interval "30s"
+  :initial 100
+  "cat /sys/class/power_supply/BAT0/capacity")
+
+(defpoll battery-charging :interval "10s"
+  :initial "false"
+  "cat /sys/class/power_supply/BAT0/status | grep -q 'Charging' && echo true || echo false")
+
+(defpoll weather-display :interval "30m"
+  :initial "+...°F"
+  "scripts/weather-fetch")
+
 ;; ── Left: Date + Music ───────────────────────────────────────────────
 
 (defwidget music []
@@ -57,6 +63,7 @@
   (box :class "left" :space-evenly false :spacing 8
     (label :class "clock" :text clock)
     (label :class "date"  :text date-str)
+    (weather-stat)
     (music)))
 
 ;; ── Right: Stats ───────────────────────────────────────────────────────────
@@ -66,29 +73,61 @@
     :onscroll "[ '{}' = 'up' ] && hyprctl hyprsunset gamma +5 || hyprctl hyprsunset gamma -5"
     :onclick "toggle-screen-temp"
     (box :class "stat" :space-evenly false :spacing 3
-      (label :class "stat-label" :text "bright")
+      (label :class "stat-label" :text "")
       (label :class "stat-val"   :text "${brightness}%"))))
 
 (defwidget audio-stat []
   (eventbox
     :onscroll "[ '{}' = 'up' ] && pamixer --increase 5 || pamixer --decrease 5"
     (box :class "stat" :space-evenly false :spacing 3
-      (label :class "stat-label" :text "audio")
+      (label :class "stat-label" :text "")
       (label :class "stat-val"   :text "${volume}%"))))
 
 (defwidget wifi-stat []
   (eventbox
     :onclick "ghostty -e nmtui &"
     (box :class "stat" :space-evenly false :spacing 3
-      (label :class "stat-label" :text "wifi")
+      (label :class "stat-label" :text "󰖩")
       (label :class "stat-val"   :text wifi-iface))))
 
 (defwidget cpu-stat []
   (eventbox
     :onclick "ghostty -e btop &"
     (box :class "stat" :space-evenly false :spacing 3
-      (label :class "stat-label" :text "cpu")
+      (label :class "stat-label" :text "")
       (label :class "stat-val"   :text "${cpu}%"))))
+
+(defwidget battery-stat []
+  (eventbox
+    :onclick "scripts/battery-notify &"
+    (label
+      :class {battery-charging == "true" ? "bat bat-charging" :
+              battery-level < 20         ? "bat bat-low"      : "bat bat-normal"}
+      :text  {battery-level >= 100 ? "" :
+              battery-charging == "true" ?
+                (battery-level >= 90 ? "󰂋" :
+                 battery-level >= 80 ? "󰢞" :
+                 battery-level >= 70 ? "󰂊" :
+                 battery-level >= 60 ? "󰂉" :
+                 battery-level >= 50 ? "󰢝" :
+                 battery-level >= 40 ? "󰂈" :
+                 battery-level >= 30 ? "󰂇" :
+                 battery-level >= 20 ? "󰂆" :
+                 battery-level >= 10 ? "󰢜" : "󰢟") :
+                (battery-level >= 90 ? "󰂂" :
+                 battery-level >= 80 ? "󰂁" :
+                 battery-level >= 70 ? "󰂀" :
+                 battery-level >= 60 ? "󰁿" :
+                 battery-level >= 50 ? "󰁾" :
+                 battery-level >= 40 ? "󰁽" :
+                 battery-level >= 30 ? "󰁼" :
+                 battery-level >= 20 ? "󰁻" :
+                 battery-level >= 10 ? "󰁺" : "󰂎")})))
+
+(defwidget weather-stat []
+  (eventbox
+    :onclick "scripts/weather-notify &"
+    (label :class "stat-val weather" :text weather-display)))
 
 (defwidget right-section []
   (box :class "right" :halign "end" :space-evenly false :spacing 8
@@ -96,12 +135,12 @@
     (audio-stat)
     (label :class "stat-val net" :text netspeed)
     (wifi-stat)
-    (stat :lbl "bat"  :value "${battery-level}%"
-          :class {battery-level < 20 ? "warn" : ""})
-    (stat :lbl "strg" :value "${disk}%")
-    (stat :lbl "ram"  :value "${ram}%")
+    (stat :lbl "󰋊" :value "${disk}%")
+    (stat :lbl ""  :value "${ram}%")
     (cpu-stat)
-    (button :class "power-btn" :onclick "scripts/powermenu &" "pwr")))
+    (battery-stat)
+    (eventbox :class "power-btn" :onclick "scripts/powermenu &"
+  (label :text "⏻"))))
 
 ;; Plain stat (non-interactive) ─────────────────────────────────────────────
 

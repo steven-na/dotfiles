@@ -7,12 +7,13 @@ $surface: #313244;
 $muted:   #6c7086;
 $warn:    #f38ba8;
 
-@import "/home/blake/.cache/wallust/eww-colors";
+@import "~/.cache/wallust/eww-colors";
 
 * {
-  font-family: "JetBrainsMono Nerd Font";
-  font-size:   12px;
-  all:         unset;
+  all:              unset;
+  font-family:      "JetBrainsMono Nerd Font Propo";
+  font-size:        12px;
+  background-color: transparent;
 }
 
 .bar {
@@ -102,11 +103,19 @@ $warn:    #f38ba8;
 }
 
 .power-btn {
-  color:       $muted;
-  padding:     0 4px;
-  margin-left: 2px;
+  color:            $muted;
+  padding:          0 4px;
+  margin-left:      2px;
+  background-color: transparent;
+  background:       transparent;
 }
 
 .power-btn:hover {
   color: $warn;
 }
+
+/* Battery icon states */
+.bat           { font-size: 1.1rem; }
+.bat-normal    { color: #f5c542; }   /* yellow */
+.bat-low       { color: #e85555; }   /* red    */
+.bat-charging  { color: #7ddc9f; }   /* light green */

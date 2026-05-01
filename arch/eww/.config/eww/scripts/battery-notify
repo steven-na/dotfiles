@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# scripts/battery-notify
+
+BAT=/sys/class/power_supply/BAT0
+
+level=$(cat $BAT/capacity)
+status=$(cat $BAT/status)
+
+# estimate time remaining via upower
+time_str=$(upower -i $(upower -e | grep BAT) 2>/dev/null \
+  | awk '/time to (full|empty)/ { print $4, $5 }')
+
+if [[ -n "$time_str" ]]; then
+  body="$status · ${level}%\n⏱ $time_str"
+else
+  body="$status · ${level}%"
+fi
+
+notify-send --urgency=low --expire-time=4000 \
+  --icon=battery \
+  "Battery" "$body"

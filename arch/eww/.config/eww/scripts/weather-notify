@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# scripts/weather-notify
+
+loc_file="$HOME/.config/eww/.weather-location"
+loc=$(cat "$loc_file" 2>/dev/null | xargs | sed 's/ /%20/g')
+url="wttr.in/${loc}?format=j1"
+
+data=$(curl -sf "$url")
+[[ -z "$data" ]] && notify-send "Weather" "Could not fetch weather data." && exit 1
+
+temp=$(echo  "$data" | jq -r '.current_condition[0].temp_F')
+feels=$(echo "$data" | jq -r '.current_condition[0].FeelsLikeF')
+desc=$(echo  "$data" | jq -r '.current_condition[0].weatherDesc[0].value')
+high=$(echo  "$data" | jq -r '.weather[0].maxtempF')
+low=$(echo   "$data" | jq -r '.weather[0].mintempF')
+
+sign() { [ "$1" -ge 0 ] && echo "+" || echo ""; }
+
+line1="$(sign $temp)${temp}°F, ${desc}"
+line2="Feels $(sign $feels)${feels}° · ↑$(sign $high)${high} ↓$(sign $low)${low}"
+
+notify-send --urgency=low --expire-time=5000 \
+  --icon=weather-clear \
+  "Weather" "${line1}\n${line2}"
