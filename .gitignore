@@ -1,3 +1,5 @@
 arch/spicetify/.config/spicetify/Themes/wallust/color.ini
 arch/mako/.config/mako/config
 .weather-location
+arch/eww/.config/eww/wallust
+arch/tmux/.config/tmux/plugins
